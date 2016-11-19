@@ -1,0 +1,4 @@
+name = Quiz Up
+description = CKeditor plugin for inputing and editing question options
+core = 7.x
+version = 7.x-0.1

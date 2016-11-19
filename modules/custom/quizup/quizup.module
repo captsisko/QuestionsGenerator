@@ -1,0 +1,29 @@
+<?php
+
+	function quizup_init(){
+		drupal_set_message('QuizUP up and responding!');
+	}
+
+	function quizup_wysiwyg_plugin($editor, $version) {
+		switch ($editor) {
+			case 'ckeditor':
+				return array(
+					'quizup_plugin' => array(
+						'path' => drupal_get_path('module', 'quizup') . '/plugin',
+						'buttons' => array(
+							'quizup_plugin_button' => t('QuizUP'),
+						),
+						'load' => TRUE,
+					),
+					'abbr' => array(
+						'path' => drupal_get_path('module', 'quizup') . '/ckeditor-docs-samples/tutorial-abbr-acf/abbr',
+						'buttons' => array(
+							'Abbr' => t('ADDR'),
+						),
+						'load' => TRUE,
+					),
+				);
+				
+				break;
+			}
+	}
