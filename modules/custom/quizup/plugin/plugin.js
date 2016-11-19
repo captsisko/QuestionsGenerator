@@ -95,30 +95,17 @@ CKEDITOR.dialog.add( 'quizupDialog', function( editor ) {
 
         onOk: function() {
             var dialog = this;
-              // Create a new <abbr> element.
-            var quizup = this.element;
-            // var quizup = editor.document.createElement( 'quizup' );
+            var quizup = editor.document.createElement( 'quizup' );
 
+            // quizup.setAttribute( 'answer', dialog.getValueOf( 'tab-basic', 'answer' ) );
             quizup.setAttribute( 'answer', dialog.getValueOf( 'tab-basic', 'answer' ) );
             quizup.setText( dialog.getValueOf( 'tab-basic', 'answer' ) );
-            // this.commitContent(quizup);
 
-            // if( this.insertMode )
-            //   editor.insertElement( quizup );
+            // var id = dialog.getValueOf( 'tab-adv', 'id' );
+            // if ( id )
+            //     quizup.setAttribute( 'id', id );
 
-            /*
-              var dialog = this;
-
-              // Create a new <abbr> element.
-              var abbr = this.element;
-
-              // Invoke the commit methods of all dialog window elements, so the <abbr> element gets modified.
-              this.commitContent( abbr );
-
-              // Finally, if in insert mode, insert the element into the editor at the caret position.
-              if ( this.insertMode )
-                editor.insertElement( abbr );
-             */
+            editor.insertElement( quizup );
         }, // close onOk
 
         onShow: function() {
