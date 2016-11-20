@@ -154,6 +154,7 @@ CKEDITOR.dialog.add( 'quizupDialog', function( editor ) {
 	            /*
 	            	sets the element attributes used to re-populate the textfields when editting
 	             */
+			    quizup.setAttribute( 'style', 'border-bottom:1px dashed' );
 			    quizup.setAttribute( 'option1', dialog.getValueOf( 'tab-basic', 'option1' ) );
 			    quizup.setAttribute( 'option2', dialog.getValueOf( 'tab-basic', 'option2' ) );
 			    quizup.setAttribute( 'option3', dialog.getValueOf( 'tab-basic', 'option3' ) );
