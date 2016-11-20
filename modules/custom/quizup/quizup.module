@@ -22,3 +22,209 @@
 				break;
 			}
 	}
+
+	function quizup_menu() {
+		$items['node/%node/moodlize'] = array(
+			'title' => 'Moodlize',
+		    'page callback' => 'drupal_get_form',
+		    'page arguments' => array('moodle_formatted_export', 1),
+			'access arguments' => array('access devel information'),
+			'type' => MENU_LOCAL_TASK,
+			'weight' => 100,
+		);
+				$items['node/%node/moodlize/xml'] = array(
+					'title' => 'XML',
+				    'page callback' => 'drupal_get_form',
+				    'page arguments' => array('moodle_formatted_export', 1),
+					'access arguments' => array('access devel information'),
+					'type' => MENU_LOCAL_TASK,
+					// 'type' => MENU_DEFAULT_LOCAL_TASK,
+					'weight' => 1,
+				);
+		return $items;
+	}
+
+	function moodle_formatted_export($node=null, $data=mull) {
+		// dsm($node, 'Node');
+		// dsm($data, 'Test');
+
+		global $base_url;
+		if( $data['build_info']['args'][0]->type == 'question' )
+			$questions = drupal_http_request($base_url . "/question/{$data['build_info']['args'][0]->nid}/xml");
+		else
+			$questions = drupal_http_request($base_url . "/paper/{$data['build_info']['args'][0]->nid}/xml");
+		// dsm($questions, 'Questions');
+		$questions = simplexml_load_string($questions->data);
+
+		$output = '';		
+
+		$xml = new DOMDocument( "1.0", "UTF-8" );
+		$xml->preserveWhiteSpace = false; 
+		$xml->formatOutput = true; 
+
+		// moodlize_question_domdocument($xml, $questions);
+		plain_flat_xml_domdocument($xml, $questions);
+		$output = $xml->saveXML();
+
+		$form = array();
+		$form['paper/download'] = array(
+		  '#type' => 'submit',
+		  '#value' => t('Download file'),
+		);
+		$form['paper/title'] = array(
+		  '#type' => 'hidden',
+		  '#value' => t($data['build_info']['args'][0]->title),
+		);
+		$form['paper/export'] = array(
+			'#type' => 'textarea',
+			'#title' => t('Node export code'),
+			'#value' => $output,
+			'#rows' => 10,
+			'#description' => t('Copy this code and then on the site you want to import to, go to the <em>Node export: import</em> link under <em>Add content</em>, and paste it in there.'),
+		);
+		return $form;
+	}
+
+	function moodle_formatted_export_submit($form, &$form_state) {
+	  // Get file.
+		header('Content-type: application/xml');
+		header("Content-Disposition: attachment; filename={$form_state['values']['paper/title']}.xml");
+		print($form_state['values']['paper/export']);
+		// Clean exit.
+		module_invoke_all('exit');
+		exit;
+	}
+
+	/**
+	 * plain xml for drupal migrate ect import
+	 */
+	function plain_flat_xml_domdocument($xml, $questions){
+		
+		// if ($xml->getElementsByTagName('quiz')->length == 0) // only create one occurance of the quiz element
+		$quiz = $xml->createElement('quiz');
+
+		$count = 0;
+		foreach ($questions as $question_node) {
+
+			$question = $xml->createElement('question');
+			$question->appendChild($xml->createElement('qid', $count++));
+
+		    $question->setAttribute('type', $question_node->field_format == 'cloze' ? 'cloze' : 'multichoice'); // format
+
+		    // set question name
+				$question_name = $xml->createElement('name');
+				// $question_name->appendChild($xml->createElement('text', "SSCE $question_node->questiontitle"));
+				$count_padded = sprintf("%02d", $count);
+				$question_name->appendChild($xml->createElement('text', "{$count_padded} - SSCE $question_node->questiontitle"));
+			    $question->appendChild($question_name);
+
+			// set question and options
+			    preg_match_all('/\[[^\]]*\]/', $question_node->body, $matches_to_rewrite);
+				for($i=0; $i < sizeof($matches_to_rewrite[0]); $i++){
+
+					// clean up all options
+					$all_options = explode(',', $matches_to_rewrite[0][$i]);
+					$all_options = str_replace(array('[', ']', '{', '}'), '', $all_options);
+						
+					// clean up the correct option(s) created above
+					preg_match_all('/\{[^\]]*\}/', $matches_to_rewrite[0][$i], $correct_options);
+					$correct_options = str_replace(array('[', ']', '{', '}'), '', $correct_options[0]);
+
+					if( $question_node->field_format == 'cloze' ){
+						$cloze = $xml->createElement('cloze');
+						$multichoice = "{1:MULTICHOICE:=";
+							foreach ($all_options as $option) {
+								// treat correct options differently
+								foreach ($correct_options as $key => $correct_option) {
+									if( $option == $correct_option )
+										$multichoice .= "{$option} #ok";
+									else
+										$multichoice .= "~{$option} #wrong";
+								}
+							}
+						$multichoice .= "}";
+
+						$question_node->body = str_replace($matches_to_rewrite[0][$i], $multichoice, $question_node->body);
+					}else{ // multichoice
+						$correctfeedback = $xml->createElement('correctfeedback');
+					    $correctfeedback->setAttribute('format', 'html');
+					    $correctfeedback->appendChild($xml->createElement('text', 'Your answer is correct.'));
+						$question->appendChild($correctfeedback);
+
+					    $partiallycorrectfeedback = $xml->createElement('partiallycorrectfeedback');
+					    $partiallycorrectfeedback->setAttribute('format', 'html');
+					    $partiallycorrectfeedback->appendChild($xml->createElement('text', 'Your answer is partially correct.'));
+					    $question->appendChild($partiallycorrectfeedback);
+
+					    $incorrectfeedback = $xml->createElement('incorrectfeedback');
+					    $incorrectfeedback->setAttribute('format', 'html');
+					    $incorrectfeedback->appendChild($xml->createElement('text', 'Your answer is incorrect.'));
+					    $question->appendChild($incorrectfeedback);
+
+					    $shownumcorrect = $xml->createElement('shownumcorrect');
+					    $question->appendChild($shownumcorrect);
+						
+						foreach ($all_options as $option) {
+						    $answer = $xml->createElement('answer');
+						    $answer->setAttribute('format', 'html');
+
+							foreach ($correct_options as $key => $correct_option) {
+								if( $option == $correct_option ){
+									$answer->setAttribute('fraction', 100);
+									// $answer->appendChild($xml->createElement('text', $correct_option));
+									$answer_text = $xml->createElement('text');
+									$answer_text->appendChild($xml->createCDATASection($option));
+									$answer->appendChild($answer_text);
+								}else{
+								    $answer->setAttribute('fraction', 0);
+								    // $answer->appendChild($xml->createElement('text', $option));
+									$answer_text = $xml->createElement('text');
+									$answer_text->appendChild($xml->createCDATASection($option));
+									$answer->appendChild($answer_text);
+								}
+							}
+						    // $answer->addAttribute('format', 'html');
+						    $answerfeedback = $xml->createElement('feedback');
+						    $answerfeedback->setAttribute('format', 'html');
+						    $answerfeedback->appendChild($xml->createElement('text'));
+						    $answer->appendChild($answerfeedback);
+
+
+						    $question->appendChild($answer);
+						}
+						
+						$question->appendChild($xml->createElement('defaultgrade', 1));
+						$question->appendChild($xml->createElement('single', true));
+					    $question->appendChild($xml->createElement('shuffleanswers', true));
+					    $question->appendChild($xml->createElement('answernumbering', 'none'));
+					}
+				} // close if statement
+
+				$generalfeedback = $xml->createElement('generalfeedback');
+				$generalfeedback->setAttribute('format', 'html');
+				$generalfeedback->appendChild($xml->createElement('text'));
+				$question->appendChild($generalfeedback);
+				$question->appendChild($xml->createElement('penalty', 0.3));
+				$question->appendChild($xml->createElement('hidden', 0));
+
+				// clear out our special options formatting for multichoice options questions
+				preg_match_all('/\[[^\]]*\]/', $question_node->body, $matches_to_rewrite);
+				for($i=0; $i < sizeof($matches_to_rewrite[0]); $i++){
+			    	$question_node->body = str_replace($matches_to_rewrite[0][$i], '', $question_node->body );
+			    }
+
+				$questiontext = $xml->createElement('questiontext');
+				$questiontext->setAttribute('format', 'html');
+				// $questiontext_text = $xml->createElement('text', str_replace('&nbsp;', '', $question_node->body));
+				$questiontext_text = $xml->createElement('text');
+				$questiontext_text->appendChild($xml->createCDATASection(str_replace('&nbsp;', '', $question_node->body)));
+				$questiontext->appendChild($questiontext_text);
+				$question->appendChild($questiontext);
+
+				
+				$quiz->appendChild( $question );
+			} // foreach end
+
+		    // the end
+				$xml->appendChild( $quiz );
+	}
