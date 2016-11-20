@@ -1,9 +1,5 @@
 <?php
 
-	function quizup_init(){
-		drupal_set_message('QuizUP up and responding!');
-	}
-
 	function quizup_wysiwyg_plugin($editor, $version) {
 		switch ($editor) {
 			case 'ckeditor':
@@ -23,7 +19,6 @@
 						'load' => TRUE,
 					),
 				);
-				
 				break;
 			}
 	}
