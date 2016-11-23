@@ -108,9 +108,9 @@ projects:
   wysiwyg:
     subdir: contrib
     version: '2.2'
-  qfactory:
-    type: module
-    custom_download: true
-  quizup:
-    type: module
-    custom_download: true
+;  qfactory:
+;    type: module
+;    custom_download: true
+;  quizup:
+;    type: module
+;    custom_download: true
