@@ -1,11 +1,12 @@
 name = Question Papers
 description = Papers and their associated questions
 core = 7.x
-package = Features
-version = 7.x-1.0-beta1
+package = Preplogs
+version = 7.x-1.0-beta2
 dependencies[] = features
 dependencies[] = list
 dependencies[] = node_reference
+dependencies[] = references_dialog
 dependencies[] = text
 dependencies[] = views
 dependencies[] = views_xml
