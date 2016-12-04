@@ -87,6 +87,9 @@ projects:
   simplify:
     subdir: contrib
     version: '3.3'
+  strongarm:
+    subdir: contrib
+    version: '2.0'
   token:
     subdir: contrib
     version: '1.6'
@@ -108,9 +111,8 @@ projects:
   wysiwyg:
     subdir: contrib
     version: '2.2'
-;  qfactory:
-;    type: module
-;    custom_download: true
-;  quizup:
-;    type: module
-;    custom_download: true
+  all:
+    type: module
+    'download][type': git
+    'download][url': 'git@github.com:captsisko/QuestionsGenerator.git'
+    'download][revision': fe9bb364cdf8779539aaadd281ba41bdb9d26576
