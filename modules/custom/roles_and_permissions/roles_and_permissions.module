@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * @file Secure Permissions Data
+ * Module file for secure permissions in code.
+ */
+
+/**
+ * Define site roles in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @return
+ *   An array defining all the roles for the site.
+ */
+function secure_permissions_data_secure_permissions_roles() {
+  return array(
+    'anonymous user',
+    'authenticated user',
+    'data input',
+  );
+}
+
+/**
+ * Define site permissions in code.
+ *
+ * Create a secure_permissions_data module directory and place this function
+ * in secure_permissions_data.module.
+ *
+ * @param $role
+ *   The role for which the permissions are being requested.
+ *
+ * @return
+ *   An array defining all the permissions for the site.
+ */
+function secure_permissions_data_secure_permissions($role) {
+  $permissions = array(
+    'anonymous user' => array(
+      'access comments',
+      'access content',
+      'use text format filtered_html',
+    ),
+    'authenticated user' => array(
+      'access comments',
+      'access content',
+      'post comments',
+      'skip comment approval',
+      'use text format filtered_html',
+    ),
+    'data input' => array(
+      'access administration pages',
+      'create body',
+      'create question content',
+      'delete own question content',
+      'edit own body',
+      'edit own paper content',
+      'edit own question content',
+      'use text format full_html',
+      'view field_feedback_misc',
+      'view field_feedback_options',
+      'view own body',
+      'view own unpublished content',
+    ),
+  );
+  if (isset($permissions[$role])) {
+    return $permissions[$role];
+  }
+}
