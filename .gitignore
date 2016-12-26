@@ -3,3 +3,5 @@ modules/contrib/
 modules/custom/qfactory/
 modules/custom/quizup/.sass-cache/
 themes/
+libraries/ckeditor/plugins/ckeditor_wiris/cache
+libraries/ckeditor/plugins/ckeditor_wiris/formulas
