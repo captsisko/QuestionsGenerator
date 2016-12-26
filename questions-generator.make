@@ -111,8 +111,8 @@ projects:
   wysiwyg:
     subdir: contrib
     version: '2.2'
-;  all:
-;    type: module
-;    'download][type': git
-;    'download][url': 'git@github.com:captsisko/QuestionsGenerator.git'
-;    'download][revision': fe9bb364cdf8779539aaadd281ba41bdb9d26576
+  all:
+    type: module
+    'download][type': git
+    'download][url': 'git@github.com:captsisko/QuestionsGenerator.git'
+    'download][revision': 8b986779e094cc01d55ebf7bed01774e38720370
